@@ -1,0 +1,8 @@
+{
+  "browser": "firefox",
+  "headless": false,
+  "email": "email@example.com",
+  "password": "12345",
+  "board_url": "https://trello.com/b/<board_id_1>",
+  "resolved_list_name": "Sprint Backlog"
+}
