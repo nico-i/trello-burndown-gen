@@ -72,7 +72,7 @@ def plot_burndown(logger, board_members, resolved_board_cards, start_date, end_d
     plt.xticks(all_dates, labels=[date.strftime(DATE_FORMAT)
                                   for date in all_dates], rotation=45, ha='right')
     # y-axis
-    plt.ylabel('Cumulative Story Points')
+    plt.ylabel('Story Points')
     plt.yticks(range(0,   np.ceil((max_story_points +
                                    max_story_points/2)).astype(int), 1))
     # plot settings
