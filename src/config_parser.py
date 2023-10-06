@@ -1,4 +1,5 @@
 import json
+import os
 
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options as Options_chrome
@@ -15,8 +16,13 @@ from util.models import Browser, Config
 def get_config(logger):
 
     logger.verbose("Loading config from %s..." % CONFIG_FILE_NAME)
+    current_dir_path = os.path.dirname(
+        os.path.abspath(__file__))
+
+    config_file_path = os.path.join(current_dir_path, '..', CONFIG_FILE_NAME)
+
     # use utf 8
-    with open("../" + CONFIG_FILE_NAME, 'r', encoding="utf8") as f:
+    with open(config_file_path, 'r', encoding="utf8") as f:
         config_json_data = json.load(f)
 
     config = Config(**config_json_data)

@@ -1,11 +1,9 @@
 
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from dateutil import tz
-from matplotlib.dates import date2num
 
 from util.constants import DATE_FORMAT
 from util.helper import truncate_txt
@@ -22,6 +20,9 @@ def plot_burndown(logger, board_members, resolved_board_cards, start_date, end_d
     # Generate a list of all dates between start_date and end_date
     all_dates = [start_date + timedelta(days=i)
                  for i in range((end_date - start_date).days + 1)]
+    
+    # Sort resolved_board_cards by resolved_on date
+    resolved_board_cards.sort(key=lambda x: x.resolved_on)
 
     data = {}
     max_story_points = 0
@@ -44,28 +45,26 @@ def plot_burndown(logger, board_members, resolved_board_cards, start_date, end_d
             max_story_points = cum_sum
 
         member_data["dates"].append(end_date)
-        member_data["story_points"].append(max_story_points)
-        member_data["labels"].append("")
+        member_data["story_points"].append(cum_sum)
+        member_data["labels"].append(" ")
 
         data[member.name] = pd.DataFrame(member_data)
 
     # Loop through the dictionary and plot each DataFrame
     for name, df in data.items():
-        if not df.empty:
+        if df.shape[0] > 0:
             # Convert 'dates' column to datetime
             df['dates'] = pd.to_datetime(df['dates'])
-
-            # Sort dataframe by 'dates'
-            df = df.sort_values('dates')
 
             # Plotting
             plt.plot(df['dates'], df['story_points'])
             plt.fill_between(df['dates'], df['story_points'],
                              label=name, alpha=0.5)
 
-    for i, row in df.iterrows():
-        plt.annotate(row['labels'], (row['dates'], row['story_points']),
-                     textcoords="offset points", xytext=(0, 8), ha='center', fontsize=7)
+        for i, row in df.iterrows():
+            
+            plt.annotate(row['labels'], (row['dates'], row['story_points']),
+                         textcoords="offset points", xytext=(0, 8), ha='center', fontsize=7)
 
     # x-axis
     plt.xlabel('Dates')
