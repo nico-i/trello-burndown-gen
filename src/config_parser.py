@@ -25,13 +25,23 @@ def get_config(logger):
     with open(config_file_path, 'r', encoding="utf8") as f:
         config_json_data = json.load(f)
 
-    config = Config(**config_json_data)
+    config = Config(config_json_data['browser'], config_json_data['headless'], config_json_data['email'], config_json_data['password'],
+                    config_json_data['board_url'], config_json_data['sprint_bl_list_name'], config_json_data['resolved_list_name'])
+
+    if(config_json_data['member_name'] is not None):
+        config.member_name = config_json_data['member_name']
 
     logger.info("Config loaded successfully!")
     logger.verbose("Browser: '%s'" % config.browser)
     logger.verbose("Headless mode: %s" % config.headless)
     logger.verbose("Trello board URL: '%s'" % config.board_url)
+    if(config.member_name is not None):
+        logger.verbose("Member: '%s'" % config.member_name)
+    else:
+        logger.verbose("Member: N/A")
     logger.verbose("Resolved list name: '%s'" % config.resolved_list_name)
+    logger.verbose("Sprint backlog list name: '%s'" %
+                   config.sprint_bl_list_name)
     logger.verbose("Trello username: '%s'" % config.email)
     logger.verbose("Trello password: %s" % ("*" * len(config.password)))
 

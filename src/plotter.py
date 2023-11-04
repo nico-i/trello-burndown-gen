@@ -1,87 +1,60 @@
-
-from datetime import timedelta
-
+import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
-import numpy as np
-import pandas as pd
-
-from util.constants import DATE_FORMAT
-from util.helper import truncate_txt
+import matplotlib.ticker as ticker
 
 
-def plot_burndown(logger, board_members, resolved_board_cards, start_date, end_date):
-    logger.verbose("Plotting burndown chart...")
-    # Define the start and end dates for the x-axis.
-    # Define a specific start_date
-    start_date = pd.to_datetime(start_date, utc=True)
-    # Define a specific end_date
-    end_date = pd.to_datetime(end_date, utc=True)
+def plot_burn_down(logger, df):
+    # Set 'sprint day' as the index
+    df.set_index('sprint day', inplace=True)
 
-    # Generate a list of all dates between start_date and end_date
-    all_dates = [start_date + timedelta(days=i)
-                 for i in range((end_date - start_date).days + 1)]
-    
-    # Sort resolved_board_cards by resolved_on date
-    resolved_board_cards.sort(key=lambda x: x.resolved_on)
+    # Plot the lines
+    plt.figure(figsize=(10, 6))
+    plt.plot([df.index[0], df.index[-1]],
+             [df['actual work'][0], 0],
+             label='Ideal Work', color='blue', linestyle='--')
+    plt.plot(df.index, df['actual work'],
+             label='Actual Work', color='red', marker='o')
 
-    data = {}
-    max_story_points = 0
-    for member in board_members:
-        cum_sum = 0.1
-        member_data = {
-            "dates": [start_date],
-            "story_points": [cum_sum],
-            "labels": [""]
-        }
-        for card in resolved_board_cards:
-            if card.assignee.name == member.name:
-                member_data["dates"].append(pd.to_datetime(card.resolved_on, utc=True)
-                                            )
-                cum_sum += card.story_points
-                member_data["story_points"].append(cum_sum)
-                member_data["labels"].append(truncate_txt(card.name, 18))
+    # Annotate the points on the 'actual work' line
+    for index, row in df.iterrows():
+        if row['label']:  # Check if there is a label for the row
+            # Join multiple labels with a new line
+            label = "\n".join(row['label'])
+            plt.annotate(label,  # this is the text
+                         # this is the point to label
+                         (index, row['actual work']),
+                         textcoords="offset points",  # how to position the text
+                         xytext=(0, 10),  # distance from text to points (x,y)
+                         ha='center')  # horizontal alignment can be left, right or center
 
-        if cum_sum > max_story_points:
-            max_story_points = cum_sum
-
-        member_data["dates"].append(end_date)
-        member_data["story_points"].append(cum_sum)
-        member_data["labels"].append(" ")
-
-        data[member.name] = pd.DataFrame(member_data)
-
-    # Loop through the dictionary and plot each DataFrame
-    for name, df in data.items():
-        if df.shape[0] > 0:
-            # Convert 'dates' column to datetime
-            df['dates'] = pd.to_datetime(df['dates'])
-
-            # Plotting
-            plt.plot(df['dates'], df['story_points'])
-            plt.fill_between(df['dates'], df['story_points'],
-                             label=name, alpha=0.5)
-
-        for i, row in df.iterrows():
-            
-            plt.annotate(row['labels'], (row['dates'], row['story_points']),
-                         textcoords="offset points", xytext=(0, 8), ha='center', fontsize=7)
-
-    # x-axis
-    plt.xlabel('Dates')
-    plt.xlim(start_date, end_date)
-    plt.xticks(all_dates, labels=[date.strftime(DATE_FORMAT)
-                                  for date in all_dates], rotation=45, ha='right')
-    # y-axis
+    # Set the title and labels
+    plt.title('Sprint Burndown Chart')
+    plt.xlabel('Sprint Day')
     plt.ylabel('Story Points')
-    plt.yticks(range(0,   np.ceil((max_story_points +
-                                   max_story_points/2)).astype(int), 1))
-    # plot settings
+
+    # Show legend
+    plt.legend()
+
+    # Rotate dates on x-axis
+    plt.xticks(rotation=45)
+    # Set x-axis to show every day
+    plt.gca().xaxis.set_major_locator(mdates.DayLocator(interval=1))
+    plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%d.%m'))
+
+    # Set y-axis ticks
+    plt.gca().yaxis.set_major_locator(ticker.MultipleLocator(1))
+    max_y_value = df['actual work'].max()
+    top_margin = 2  # you can change this to whatever margin you want
+    plt.ylim(top=max_y_value + top_margin)
+
+    # Add a grid with transparency
+    plt.grid(True, which='both', linestyle='--', linewidth=0.5, alpha=0.7)
+
+    # Adjust layout to prevent clipping of tick-labels
     plt.tight_layout()
-    plt.title('Burndown Chart from %s to %s' % (start_date.strftime(
-        DATE_FORMAT), end_date.strftime(DATE_FORMAT)))
-    plt.legend(loc='upper left')
 
-    logger.info("Burndown chart plotted successfully!")
-    logger.verbose("Showing burndown chart...")
+    # Add margins to the plot
+    plt.margins(x=0.075)
 
+    # Show the plot
     plt.show()

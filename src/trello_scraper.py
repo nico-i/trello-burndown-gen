@@ -30,8 +30,8 @@ def get_board_json(driver, config):
     continue_btn = wait.until(
         EC.presence_of_element_located((By.ID, "login-submit")))
     continue_btn.click()
-    
-    driver.implicitly_wait(5)
+
+    driver.implicitly_wait(10)
 
     # wait for password field and login
     pw_txt_field = wait.until(
@@ -51,11 +51,11 @@ def get_board_json(driver, config):
         raw_data_btn = wait.until(
             EC.presence_of_element_located((By.ID, "rawdata-tab")))
         raw_data_btn.click()
-    
+
     raw_data_pre = wait.until(
         EC.presence_of_element_located((By.TAG_NAME, "pre")))
     raw_json = raw_data_pre.text
-    
+
     board_json = json.loads(raw_json)
 
     driver.quit()

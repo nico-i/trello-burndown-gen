@@ -9,9 +9,11 @@ import verboselogs
 
 from board_parser import parse_board
 from config_parser import get_config, get_driver
-from plotter import plot_burndown
+from data_processor import create_df
+from plotter import plot_burn_down
 from trello_scraper import get_board_json
 from util.constants import CACHE_FILE_NAME, DATE_FORMAT
+from util.helper import valid_date
 
 
 def main():
@@ -19,11 +21,11 @@ def main():
     logger = logging.getLogger(__name__)
     coloredlogs.install(level='DEBUG', logger=logger)
 
-    logger.notice('+++ Welcome to Trello Burndown! +++')
+    logger.notice('+++ Welcome to Trello Burn-down! +++')
     logger.verbose('Use -h or --help for help')
     logger.notice('--- Starting program ---')
-    parser = argparse.ArgumentParser(prog='burndown_gen.py',
-                                     description='Trello Burndown Generator: Create a plot from a Trello board\'s JSON data!')
+    parser = argparse.ArgumentParser(prog='Trello Burn-down Generator',
+                                     description="Create a plot from a Trello board's JSON data!")
 
     # --refetch or -r, store_true means it does not accept any value, if present it's True else False
     parser.add_argument("--refetch", "-r", action="store_true",
@@ -41,7 +43,7 @@ def main():
     end_date = args.end
     start_date = end_date - timedelta(days=args.duration)
 
-    logger.info("Creating burndown chart for sprint %s - %s" %
+    logger.info("Creating burn-down chart for sprint %s - %s" %
                 (start_date.strftime(DATE_FORMAT), end_date.strftime(DATE_FORMAT)))
 
     config = get_config(logger)
@@ -61,19 +63,13 @@ def main():
             json.dump(board_json, f, indent=4)
 
     logger.info("Board data retrieved successfully!")
-    _, board_members, resolved_board_cards = parse_board(logger,
-                                                         config, board_json)
+    _, _, board_cards = parse_board(logger,
+                                    config, board_json)
 
-    plot_burndown(logger, board_members,
-                  resolved_board_cards, start_date, end_date)
+    df = create_df(logger, config,
+                   board_cards, start_date, end_date)
 
-
-def valid_date(date_string):
-    try:
-        return datetime.strptime(date_string, DATE_FORMAT)
-    except ValueError:
-        msg = f"Not a valid date: '{date_string}'."
-        raise argparse.ArgumentTypeError(msg)
+    plot_burn_down(logger, df)
 
 
 if __name__ == "__main__":
