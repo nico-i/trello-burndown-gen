@@ -1,7 +1,5 @@
 import datetime
-import platform
 from enum import Enum
-from typing import List
 
 
 class Browser(Enum):
@@ -10,13 +8,17 @@ class Browser(Enum):
 
 
 class Config:
-    def __init__(self, browser: str, headless: bool, email: str, password: str, board_url: str, sprint_bl_list_name: str, resolved_list_name: str, member_name: str = None):
+    def __init__(self, browser: str, headless: bool, refetch: bool, email: str, password: str, board_url: str, sprint_bl_list_name: str, resolved_list_name: str, end_date: datetime.datetime, duration: int, member_name: str = None):
         self.resolved_list_name = resolved_list_name
         self.sprint_bl_list_name = sprint_bl_list_name
         self.headless = headless
+        self.refetch = refetch
         self.email = email
         self.password = password
         self.member_name = member_name
+        self.end_date = end_date
+        self.duration = duration
+        self.start_date = end_date - datetime.timedelta(days=duration)
 
         if browser not in [d.value for d in Browser]:
             raise TypeError("driver must be one of the following: %s. Was: '%s'" % ([

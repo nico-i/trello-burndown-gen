@@ -1,7 +1,7 @@
 
 import json
 
-from util.models import TrelloAction, TrelloCard, TrelloList, TrelloMember
+from src.util.models import TrelloAction, TrelloCard, TrelloList, TrelloMember
 import pandas as pd
 
 def parse_lists(board_json):

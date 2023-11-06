@@ -5,7 +5,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
-from util.models import Browser
+from src.util.models import Browser
 
 
 def get_board_json(driver, config):

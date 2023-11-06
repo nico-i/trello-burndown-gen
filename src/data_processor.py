@@ -1,20 +1,14 @@
-
-from datetime import timedelta
-
-import matplotlib.pyplot as plt
-import numpy as np
 import pandas as pd
 
-from util.constants import DATE_FORMAT
-from util.helper import truncate_txt
+from src.util.helper import truncate_txt
 
 
-def create_df(logger, config, board_cards, start_date, end_date):
+def create_df(logger, config, board_cards):
 
     logger.verbose("Plotting burn down chart...")
     # Define the start and end dates for the x-axis.
-    start_date = pd.to_datetime(start_date, utc=True)
-    end_date = pd.to_datetime(end_date, utc=True)
+    start_date = pd.to_datetime(config.start_date, utc=True)
+    end_date = pd.to_datetime(config.end_date, utc=True)
 
     # Filter all cards moved in to the sprint BL list on or the day before the start date
     sprint_cards = []

@@ -1,3 +1,4 @@
+import datetime
 import json
 import os
 
@@ -9,31 +10,67 @@ from selenium.webdriver.firefox.service import Service as FirefoxService
 from webdriver_manager.chrome import ChromeDriverManager
 from webdriver_manager.firefox import GeckoDriverManager
 
-from util.constants import CONFIG_FILE_NAME
-from util.models import Browser, Config
+from src.util.constants import CONFIG_FILE_NAME, DATE_FORMAT
+from src.util.models import Browser, Config
 
 
-def get_config(logger):
+def get_config(logger, args_dict):
+    config_file_path = args_dict['config']
 
-    logger.verbose("Loading config from %s..." % CONFIG_FILE_NAME)
-    current_dir_path = os.path.dirname(
-        os.path.abspath(__file__))
+    if (os.path.isfile(config_file_path) == False):
+        # check if all args (except optional 'member') are set in case of config not existing
+        for key, value in args_dict.items():
+            if key == "member":
+                continue
+            if value == None:
+                raise ValueError(
+                    "'%s' is None! Either a config file or all required arguments must be provided!" % key)
+        logger.verbose(
+            "No config file present, creating config from arguments...")
+        config = Config(browser=args_dict.browser, headless=args_dict.headless, refetch=args_dict.refetch, email=args_dict.email, password=args_dict.password,
+                        board_url=args_dict.board, sprint_bl_list_name=args_dict.sprint, resolved_list_name=args_dict.resolved, end_date=args_dict.end, duration=args_dict.duration, member_name=args_dict.member)
+    else:
+        logger.verbose("Loading config from '%s' ..." % config_file_path)
 
-    config_file_path = os.path.join(current_dir_path, '..', CONFIG_FILE_NAME)
+        arg_to_conf_dict = {
+            "member": "member_name",
+            "board": "board_url",
+            "resolved": "resolved_list_name",
+            "sprint": "sprint_bl_list_name",
+            "end": "sprint_end_date",
+            "duration": "sprint_duration"
+        }
 
-    # use utf 8
-    with open(config_file_path, 'r', encoding="utf8") as f:
-        config_json_data = json.load(f)
+        arg_to_conf_dict.update(
+            {k: k for k in args_dict.keys() if k not in arg_to_conf_dict.keys()})
 
-    config = Config(config_json_data['browser'], config_json_data['headless'], config_json_data['email'], config_json_data['password'],
-                    config_json_data['board_url'], config_json_data['sprint_bl_list_name'], config_json_data['resolved_list_name'])
+        with open(config_file_path, 'r', encoding="utf8") as f:
+            config_json_data = json.load(f)
 
-    if(config_json_data['member_name'] is not None):
-        config.member_name = config_json_data['member_name']
+        for key in args_dict.keys():
+            if key == "member" or key == "config":
+                continue
+            try:
+                config_json_data[arg_to_conf_dict[key]]
+            except KeyError:
+                if args_dict[key] == None:
+                    raise ValueError(
+                        "Value '%s' must be set in either the config or as an argument!" % key)
+                else:
+                    config_json_data[arg_to_conf_dict[key]] = args_dict[key]
+        config = Config(browser=config_json_data['browser'], headless=config_json_data['headless'], refetch=config_json_data['refetch'], email=config_json_data['email'], password=config_json_data['password'],
+                        board_url=config_json_data['board_url'], sprint_bl_list_name=config_json_data['sprint_bl_list_name'], resolved_list_name=config_json_data[
+                            'resolved_list_name'], end_date=config_json_data['sprint_end_date'], duration=int(config_json_data['sprint_duration']), member_name=config_json_data['member'])
 
+    for key, value in args_dict.items():
+        if value != None:
+            setattr(config, key, value)
+            logger.verbose(
+                "Overriding config value '%s' with argument value '%s'" % (key, value))
     logger.info("Config loaded successfully!")
     logger.verbose("Browser: '%s'" % config.browser)
     logger.verbose("Headless mode: %s" % config.headless)
+    logger.verbose("Refetch: %s" % config.refetch)
     logger.verbose("Trello board URL: '%s'" % config.board_url)
     if(config.member_name is not None):
         logger.verbose("Member: '%s'" % config.member_name)
@@ -44,7 +81,11 @@ def get_config(logger):
                    config.sprint_bl_list_name)
     logger.verbose("Trello username: '%s'" % config.email)
     logger.verbose("Trello password: %s" % ("*" * len(config.password)))
-
+    logger.verbose("Sprint start date: %s" %
+                   config.start_date.strftime("%d.%m.%Y"))
+    logger.verbose("Sprint duration: %s days" % config.duration)
+    logger.verbose("Sprint end date: %s" %
+                   config.end_date.strftime("%d.%m.%Y"))
     return config
 
 

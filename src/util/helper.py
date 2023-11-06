@@ -1,7 +1,7 @@
 import argparse
 import datetime
 
-from util.constants import DATE_FORMAT
+from src.util.constants import DATE_FORMAT
 
 
 def truncate_txt(txt, max_len=10):
