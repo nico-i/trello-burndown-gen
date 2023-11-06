@@ -13,15 +13,21 @@ To this:
 ## Usage
 
 1. Create a Kanban Trello board with a *resolved* and a *sprint backlog* bucket.
-2. Create a burner Trello account and invite them to your board (you can use your personal account, but it isn't recommended since this program requires the actual account password to login + it may also potentially ban your account for botting, although not confirmed)
-3. Clone this repository and install the dependencies with
+2. Create a burner Trello account and invite them to your board *(you can use your personal account, but it isn't recommended since this program may cause your account to be banned for botting, although not this is not confirmed)*
+3. Clone this repository with the GUI above or with the following command:
 
 ```shell
-   pip install -r requirements.txt
-   ```
+git clone https://github.com/nico-i/trello-burndown-gen
+```
 
-1. Add a `conf.json` to the root dir. See [`example.conf.json`](./example.conf.json) for an example or the [*Configuration*](#configuration) section for more information.
-2. Run the program in the CLI with:
+1. install the dependencies:
+
+```shell
+pip install -r requirements.txt
+```
+
+5. Add a `conf.json` to the root dir. See [`example.conf.json`](./example.conf.json) for an example or the [*Configuration*](#configuration) section for more information.
+6. Run the program:
 
 ```shell
 py burndown_gen.py
@@ -50,7 +56,29 @@ The program can either be configured via a `conf.json` file in the root director
 
 To develop this program, apart from the steps mentioned above, it is recommended to create a virtual environment and install the dependencies with `pip install -r requirements.txt`.
 
-To create a virtual environment, run `<python installation> -m venv <path to venv>`. To activate the virtual environment, run `<path to venv>/Scripts/activate.bat` on Windows or `<path to venv>/bin/activate` on Linux. To deactivate the virtual environment, run `deactivate`.
+To create a virtual environment, run:
+
+```shell
+python -m venv <path to venv>
+```
+
+To activate the virtual environment, run:
+
+```shell
+<path to venv>/Scripts/activate.bat # on Windows
+```
+
+or
+
+```shell
+<path to venv>/bin/activate # on Linux
+```
+
+To deactivate the virtual environment, run:
+
+```shell
+deactivate
+```
 
 ## License
 
