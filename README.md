@@ -13,7 +13,7 @@ To this:
 ## Usage
 
 1. Create a Kanban Trello board with a *resolved* and a *sprint backlog* bucket.
-2. Create a burner Trello account and invite them to your board *(you can use your personal account, but it isn't recommended since this program may cause your account to be banned for botting, although not this is not confirmed)*
+2. Create a burner Trello account and invite them to your board *(you can use your personal account, but it isn't recommended since this program may cause your account to be banned for botting, although this is yet to be confirmed)*
 3. Clone this repository with the GUI above or with the following command:
 
 ```shell
